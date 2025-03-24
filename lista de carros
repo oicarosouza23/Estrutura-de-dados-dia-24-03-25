@@ -1,0 +1,78 @@
+#include <stdio.h>
+#include <string.h>
+
+typedef struct {
+    char nome[50];
+    float potencia;
+    char marca[50];
+} Carro;
+
+void trocar(Carro *a, Carro *b) {
+    Carro temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+int particionar(Carro carros[], int baixo, int alto, int (*compara)(Carro, Carro)) {
+    Carro pivo = carros[alto];
+    int i = baixo - 1;
+
+    for (int j = baixo; j < alto; j++) {
+        if (compara(carros[j], pivo) <= 0) {
+            i++;
+            trocar(&carros[i], &carros[j]);
+        }
+    }
+    trocar(&carros[i + 1], &carros[alto]);
+    return i + 1;
+}
+
+void quickSort(Carro carros[], int baixo, int alto, int (*compara)(Carro, Carro)) {
+    if (baixo < alto) {
+        int pi = particionar(carros, baixo, alto, compara);
+        quickSort(carros, baixo, pi - 1, compara);
+        quickSort(carros, pi + 1, alto, compara);
+    }
+}
+
+int compararPorPotencia(Carro a, Carro b) {
+    return (a.potencia > b.potencia) - (a.potencia < b.potencia);
+}
+
+int compararPorNomeMarca(Carro a, Carro b) {
+    int nomeCmp = strcmp(a.nome, b.nome);
+    return nomeCmp ? nomeCmp : strcmp(a.marca, b.marca);
+}
+
+void imprimirCarros(Carro carros[], int tamanho) {
+    for (int i = 0; i < tamanho; i++) {
+        printf("Nome: %s, Potência: %.2f, Marca: %s\n", carros[i].nome, carros[i].potencia, carros[i].marca);
+    }
+}
+
+int main() {
+    Carro carros[] = {
+        {"Fusca", 50.0, "Volkswagen"},
+        {"Civic", 15590.0, "Honda"},
+        {"Corolla", 140.0, "Toyota"},
+        {"Mustang", 4500.0, "Ford"},
+        {"Ka", 85.0, "Ford"}
+    };
+
+    int tamanho = sizeof(carros) / sizeof(carros[0]);
+
+
+    printf("-----------------------------------------------\n");
+    printf("Ordenado por potência:\n");
+    quickSort(carros, 0, tamanho - 1, compararPorPotencia);
+    imprimirCarros(carros, tamanho);
+
+    printf("-----------------------------------------------\n");
+
+    printf("\nOrdenado por nome e marca:\n");
+    quickSort(carros, 0, tamanho - 1, compararPorNomeMarca);
+    imprimirCarros(carros, tamanho);
+    printf("-----------------------------------------------\n");
+
+    return 0;
+}
