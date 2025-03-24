@@ -1,0 +1,71 @@
+#include <stdio.h>
+#include <string.h>
+
+typedef struct {
+    char nome[50];
+    int quantidade;
+    float preco;
+} Produto;
+
+void merge(Produto array[], int inicio, int meio, int fim, int (*compara)(Produto, Produto)) {
+    int n1 = meio - inicio + 1, n2 = fim - meio;
+    Produto esquerda[n1], direita[n2];
+
+    for (int i = 0; i < n1; i++) esquerda[i] = array[inicio + i];
+    for (int j = 0; j < n2; j++) direita[j] = array[meio + 1 + j];
+
+    int i = 0, j = 0, k = inicio;
+    while (i < n1 && j < n2) {
+        if (compara(esquerda[i], direita[j]) <= 0) array[k++] = esquerda[i++];
+        else array[k++] = direita[j++];
+    }
+    while (i < n1) array[k++] = esquerda[i++];
+    while (j < n2) array[k++] = direita[j++];
+}
+
+void mergeSort(Produto array[], int inicio, int fim, int (*compara)(Produto, Produto)) {
+    if (inicio < fim) {
+        int meio = inicio + (fim - inicio) / 2;
+        mergeSort(array, inicio, meio, compara);
+        mergeSort(array, meio + 1, fim, compara);
+        merge(array, inicio, meio, fim, compara);
+    }
+}
+
+int compararPorPreco(Produto a, Produto b) { return (a.preco > b.preco) - (a.preco < b.preco); }
+int compararPorQuantidade(Produto a, Produto b) { return a.quantidade - b.quantidade; }
+int compararPorNome(Produto a, Produto b) { return strcmp(a.nome, b.nome); }
+
+void imprimirProdutos(Produto produtos[], int tamanho) {
+    for (int i = 0; i < tamanho; i++) {
+        printf("Nome: %s, Quantidade: %d, Preço: %.2f\n", produtos[i].nome, produtos[i].quantidade, produtos[i].preco);
+    }
+}
+
+int main() {
+    Produto produtos[] = {
+        {"Produto A", 5, 10.0}, {"Produto B", 2, 15.0},
+        {"Produto C", 8, 7.0}, {"Produto D", 1, 20.0}
+    };
+    int tamanho = sizeof(produtos) / sizeof(produtos[0]);
+
+    printf("------------------------------------------------\n");
+
+    printf("Ordenado por preço:\n");
+    mergeSort(produtos, 0, tamanho - 1, compararPorPreco);
+    imprimirProdutos(produtos, tamanho);
+
+    printf("------------------------------------------------\n");
+
+    printf("\nOrdenado por quantidade:\n");
+    mergeSort(produtos, 0, tamanho - 1, compararPorQuantidade);
+    imprimirProdutos(produtos, tamanho);
+
+    printf("------------------------------------------------\n");
+
+    printf("\nOrdenado por nome:\n");
+    mergeSort(produtos, 0, tamanho - 1, compararPorNome);
+    imprimirProdutos(produtos, tamanho);
+    printf("------------------------------------------------\n");
+    return 0;
+}
